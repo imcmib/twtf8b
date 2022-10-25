@@ -1,5 +1,13 @@
 package com.imcmib;
 
+import java.util.Arrays;
+
+/**
+ * The Encoder class provides functionality to encode string and decode integer array
+ * using "Weird Text Format-8" algorithm.
+ *
+ * @author     Artem Ivanchenko
+ */
 public class Encoder {
 
     private final static int BLOCKS_COUNT = 4;
@@ -8,45 +16,65 @@ public class Encoder {
     /**
      * Encodes string using "The Weird Text Format (8-bit)" algorithm.
      * @param string string to encode.
-     * @return encoded value in decimal format.
+     * @return encoded value.
      */
-    public int encode(String string) {
+    public int[] encode(String string) {
         System.out.println("Input:\t\t\t" + string);
 
-        System.out.print("Input ASCII:\t");
-        printHex(string);
+        int sectionsCount = string.length() / BLOCKS_COUNT;
+        if (string.length() % BLOCKS_COUNT != 0) {
+            sectionsCount += 1;
+        };
+        int[] result = new int[sectionsCount];
 
-        char[] decoded = strToBin(string);
-        System.out.print("Decoded:\t\t");
-        printChars(decoded);
+        for (int i = 0; i < sectionsCount; i++) {
+            int beginIndex = i * BLOCKS_COUNT;
+            int endIndex = Math.min(string.length(), beginIndex + BLOCKS_COUNT);
+            String section = string.substring(beginIndex, endIndex);
 
-        char[] encoded = encode(decoded);
-        System.out.print("Encoded:\t\t");
-        printChars(encoded);
+            System.out.print("Input ASCII:\t");
+            printHex(section);
 
-        int result = binToDec(encoded);
-        System.out.print("Output (hex):\t");
-        System.out.println("0x" + Integer.toHexString(result));
-        System.out.println("Output (dec):\t" + result);
+            char[] decoded = strToBin(section);
+            System.out.print("Decoded:\t\t");
+            printChars(decoded);
+
+            char[] encodedBin = encode(decoded);
+            System.out.print("Encoded:\t\t");
+            printChars(encodedBin);
+
+            int encodedDec = binToDec(encodedBin);
+            System.out.print("Output (hex):\t");
+            System.out.println("0x" + Integer.toHexString(encodedDec));
+            System.out.println("Output (dec):\t" + encodedDec);
+
+            result[i] = encodedDec;
+        }
 
         return result;
     }
 
-    public String decode(int value) {
-        System.out.println("Input (dec):\t" + value);
+    public String decode(int[] value) {
+        System.out.println("Input (dec):\t" + Arrays.toString(value));
 
-        char[] encoded = decToBin(value, BITS_COUNT * BLOCKS_COUNT);
-        System.out.print("Encoded:\t\t");
-        printChars(encoded);
+        StringBuilder result = new StringBuilder();
 
-        char[] decoded = decode(encoded);
-        System.out.print("Decoded:\t\t");
-        printChars(decoded);
+        for (int i : value) {
+            char[] encoded = decToBin(i, BITS_COUNT * BLOCKS_COUNT);
+            System.out.print("Encoded:\t\t");
+            printChars(encoded);
 
-        String result = binToStr(decoded);
-        System.out.println("Output:\t\t\t" + result);
+            char[] decoded = decode(encoded);
+            System.out.print("Decoded:\t\t");
+            printChars(decoded);
 
-        return result;
+            String section = binToStr(decoded);
+            System.out.println("Output:\t\t\t" + section);
+
+            result.append(section);
+        }
+
+        return result.toString();
     }
 
     /**

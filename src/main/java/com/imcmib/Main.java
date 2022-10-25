@@ -2,6 +2,8 @@ package com.imcmib;
 
 import org.apache.commons.cli.*;
 
+import java.util.Arrays;
+
 public class Main {
 
     public static final Encoder ENCODER = new Encoder();
@@ -17,7 +19,7 @@ public class Main {
             if (cmd.hasOption("e")) {
                 encode(cmd.getOptionValue("e"));
             } else if (cmd.hasOption("d")) {
-                decode(Integer.parseInt(cmd.getOptionValue("d")));
+                decode(cmd.getOptionValue("d"));
             } else if (cmd.hasOption("h")) {
                 printHelp(options, helper);
             } else {
@@ -58,16 +60,27 @@ public class Main {
     }
 
     private static void encode(String string) {
-        int encoded = ENCODER.encode(string);
-        System.out.println(encoded);
+        int[] encoded = ENCODER.encode(string);
+        System.out.println(Arrays.toString(encoded));
     }
 
-    private static void decode(int value) {
+    private static void decode(String string) {
+        int[] value = parseIntArray(string);
         String decoded = ENCODER.decode(value);
         System.out.println(decoded);
     }
 
     private static void printHelp(Options options, HelpFormatter helper) {
         helper.printHelp("available arguments:", options);
+    }
+
+    private static int[] parseIntArray(String string) {
+        String[] splitArray = string.split(",");
+        int[] array = new int[splitArray.length];
+
+        for (int i = 0; i < splitArray.length; i++) {
+            array[i] = Integer.parseInt(splitArray[i]);
+        }
+        return array;
     }
 }
